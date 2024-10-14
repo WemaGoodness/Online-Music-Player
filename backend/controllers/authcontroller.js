@@ -3,7 +3,7 @@ const user = require('../models/usermodel');
 const jwt = require('jsonwebtoken');
 
 // read the jwt secret and expiration from environment variables
-const jwt_secret = process.env.JWT_SECRET || 'your_jwt_secret';
+const jwt_secret = process.env.JWT_SECRET || 'fallback_jwt_secret';
 const jwt_expires_in = '30d';
 
 // generate a jwt token using user id
