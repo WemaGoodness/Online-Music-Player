@@ -1,11 +1,14 @@
-// import express router and authcontroller methods (signup, login)
+// Import express and authentication controller
 const express = require('express');
 const { signup, login } = require('../controllers/authcontroller');
 
-const router = express.Router(); // create a new router object
+const router = express.Router();
 
-// define post routes for signup and login
+// Route for user signup
 router.post('/signup', signup);
+
+// Route for user login
 router.post('/login', login);
 
-module.exports = router; // export the router to use in the app
+// Export the router
+module.exports = router;

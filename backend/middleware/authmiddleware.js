@@ -1,36 +1,35 @@
-// import jwt for verifying tokens and user model for retrieving user data
 const jwt = require('jsonwebtoken');
 const user = require('../models/usermodel');
 
-// read the jwt secret from environment variables
-const jwt_secret = process.env.JWT_SECRET || 'your_jwt_secret';
-
-// middleware to verify the jwt token in request headers
+// Middleware to protect routes using JWT
 const protect = async (req, res, next) => {
     let token;
 
-    // check if the request has authorization header with bearer token
-    if (req.headers.authorization && req.headers.authorization.starts_with('Bearer')) {
+    // Check if the authorization header contains a valid Bearer token
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         try {
-            // extract the token by splitting the authorization header
+            // Extract the token from the header
             token = req.headers.authorization.split(' ')[1];
 
-            // decode the token to get user id
-            const decoded = jwt.verify(token, jwt_secret);
+            // Verify the token using JWT
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // fetch user from the database and attach it to request object
-            req.user = await user.find_by_id(decoded.id).select('-password'); // omit password
+            // Find the user by ID from the decoded token and attach the user to the request
+            req.user = await user.findById(decoded.id).select('-password');
 
-            next(); // proceed to the next middleware or controller
+            // Proceed to the next middleware or controller
+            next();
         } catch (error) {
-            res.status(401).json({ message: 'not authorized, token failed' }); // unauthorized if token fails
+            // Handle token verification errors
+            console.error('Error verifying token:', error);
+            return res.status(401).json({ message: 'Not authorized, token failed' });
         }
     }
 
-    // if no token is provided, send unauthorized response
+    // If no token is provided, return unauthorized error
     if (!token) {
-        res.status(401).json({ message: 'not authorized, no token' });
+        return res.status(401).json({ message: 'Not authorized, no token' });
     }
 };
 
-module.exports = protect; // export the middleware
+module.exports = protect;

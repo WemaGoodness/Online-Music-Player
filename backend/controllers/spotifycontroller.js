@@ -1,62 +1,242 @@
-const SpotifyWebApi = require('spotify-web-api-node');
+const axios = require('axios');
+const { URLSearchParams } = require('url');
 
-// method to initialize the Spotify API client with environment variables
-const initialize_spotify_api = () => {
-    return new SpotifyWebApi({
-        clientId: process.env.SPOTIFY_CLIENT_ID,        // load client ID from environment
-        clientSecret: process.env.SPOTIFY_CLIENT_SECRET, // load client secret from environment
-        redirectUri: process.env.SPOTIFY_REDIRECT_URI,   // load redirect URI from environment
-    });
+// Dynamically import the pkce-challenge module
+let pkce_challenge;
+(async () => {
+    pkce_challenge = (await import('pkce-challenge')).default;
+})();
+
+// Generate Spotify authorization URL for PKCE flow
+const generate_spotify_auth_url = (req, res) => {
+    // Ensure pkce_challenge is loaded
+    if (!pkce_challenge) {
+        return res.status(500).json({ message: 'PKCE challenge module not loaded' });
+    }
+
+    // Generate PKCE code verifier and challenge
+    const challenge = pkce_challenge();
+
+    // Store the code verifier in the session for later verification
+    req.session.code_verifier = challenge.code_verifier;
+
+    // Log session data to verify if code_verifier is stored correctly
+    console.log('Session after setting code_verifier:', req.session);
+
+    // Construct Spotify authorization URL with required parameters
+    const auth_url = `https://accounts.spotify.com/authorize?${new URLSearchParams({
+        client_id: process.env.SPOTIFY_CLIENT_ID,
+        response_type: 'code',
+        redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+        code_challenge_method: 'S256',
+        code_challenge: challenge.code_challenge,
+        scope: 'playlist-modify-public playlist-modify-private user-read-email user-read-playback-state user-modify-playback-state',
+    }).toString()}`;
+
+    // Redirect user to Spotify login page
+    res.redirect(auth_url);
 };
 
-// method to get the authorization URL to authenticate with Spotify
-const get_spotify_auth_url = (req, res) => {
-    const spotify_api = initialize_spotify_api();  // initialize API here with env vars
-    const scopes = ['user-read-private', 'user-read-email', 'playlist-read-private', 'playlist-read-collaborative', 'user-library-read'];
-
-    // generate an authorization URL to initiate OAuth 2.0
-    const auth_url = spotify_api.createAuthorizeURL(scopes);
-    res.redirect(auth_url); // redirect user to Spotify's auth page
-};
-
-// method to handle Spotify callback and retrieve access token
-const spotify_callback = async (req, res) => {
-    const spotify_api = initialize_spotify_api();  // initialize API here with env vars
-    const code = req.query.code; // get the authorization code from Spotify
+// Handle Spotify callback and exchange authorization code for access token
+const handle_spotify_callback = async (req, res) => {
+    const { code } = req.query;
 
     try {
-        // exchange authorization code for access token
-        const data = await spotify_api.authorizationCodeGrant(code);
-        
-        // set access token and refresh token in the Spotify API client
-        spotify_api.setAccessToken(data.body['access_token']);
-        spotify_api.setRefreshToken(data.body['refresh_token']);
+        // Log session to check if code_verifier is available
+        console.log('Session at callback:', req.session);
+        const code_verifier = req.session.code_verifier;
 
-        res.status(200).json({ message: 'Spotify authentication successful', access_token: data.body['access_token'] });
+        if (!code_verifier) {
+            return res.status(400).json({ message: 'Code verifier missing from session' });
+        }
+
+        // Exchange authorization code for access token using Spotify API
+        const response = await axios.post('https://accounts.spotify.com/api/token', new URLSearchParams({
+            client_id: process.env.SPOTIFY_CLIENT_ID,
+            grant_type: 'authorization_code',
+            code,
+            redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+            code_verifier: code_verifier,
+        }).toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+
+        // Store access and refresh tokens in session
+        req.session.access_token = response.data.access_token;
+        req.session.refresh_token = response.data.refresh_token;
+
+        res.status(200).json({ message: 'Spotify authentication successful', access_token: response.data.access_token });
     } catch (error) {
-        res.status(400).json({ message: 'Spotify authentication failed', error });
+        console.error('Error exchanging authorization code:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error exchanging authorization code', error: error.message });
     }
 };
 
-// method to search for tracks on Spotify
-const search_tracks = async (req, res) => {
-    const spotify_api = initialize_spotify_api();  // initialize API here with env vars
-    const track_name = req.query.q; // get the search query (track name)
+// Create a new Spotify playlist after user is authenticated
+const create_spotify_playlist = async (req, res) => {
+    const { name, description, public_playlist } = req.body;
+    const access_token = req.session.access_token;
 
     try {
-        // search for tracks using the Spotify API
-        const data = await spotify_api.searchTracks(track_name);
-        
-        // send back the first 10 tracks found
-        res.status(200).json({ tracks: data.body.tracks.items.slice(0, 10) });
+        // Get user profile from Spotify to retrieve user ID
+        const user_profile = await axios.get('https://api.spotify.com/v1/me', {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        });
+
+        const user_id = user_profile.data.id;
+
+        // Create a new playlist using Spotify API
+        const playlist_response = await axios.post(`https://api.spotify.com/v1/users/${user_id}/playlists`, {
+            name,
+            description,
+            public: public_playlist || false,
+        }, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        res.status(201).json(playlist_response.data); // Send newly created playlist data
     } catch (error) {
-        res.status(400).json({ message: 'Error searching tracks', error });
+        console.error('Error creating playlist:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error creating Spotify playlist', error: error.message });
     }
 };
 
-// export the functions to be used in routes
+// Fetch user's Spotify playlists
+const get_user_playlists = async (req, res) => {
+    const access_token = req.session.access_token;
+
+    try {
+        const response = await axios.get('https://api.spotify.com/v1/me/playlists', {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        });
+
+        res.status(200).json(response.data.items); // Send user's playlists
+    } catch (error) {
+        console.error('Error fetching playlists:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error fetching playlists', error: error.message });
+    }
+};
+
+// Search for artists, albums, or tracks on Spotify
+const search_spotify = async (req, res) => {
+    const access_token = req.session.access_token;
+    const { query, type } = req.query; // Search query and type (artist, album, or track)
+
+    try {
+        const response = await axios.get(`https://api.spotify.com/v1/search?${new URLSearchParams({
+            q: query,
+            type: type,  // Search for 'artist', 'album', or 'track'
+            limit: 10,
+        })}`, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        });
+
+        res.status(200).json(response.data); // Send search results
+    } catch (error) {
+        console.error('Error searching Spotify:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error searching Spotify', error: error.message });
+    }
+};
+
+// Play a track on Spotify
+const play_track = async (req, res) => {
+    const access_token = req.session.access_token;
+    const { track_uri } = req.body;
+
+    try {
+        // Send request to Spotify to play the specified track
+        await axios.put('https://api.spotify.com/v1/me/player/play', { uris: [track_uri] }, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        res.status(204).send(); // Send no content response
+    } catch (error) {
+        console.error('Error playing track:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error playing track', error: error.message });
+    }
+};
+
+// Pause playback on Spotify
+const pause_playback = async (req, res) => {
+    const access_token = req.session.access_token;
+
+    try {
+        await axios.put('https://api.spotify.com/v1/me/player/pause', {}, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        res.status(204).send(); // Send no content response
+    } catch (error) {
+        console.error('Error pausing playback:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error pausing playback', error: error.message });
+    }
+};
+
+// Resume playback on Spotify
+const resume_playback = async (req, res) => {
+    const access_token = req.session.access_token;
+
+    try {
+        await axios.put('https://api.spotify.com/v1/me/player/play', {}, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        res.status(204).send(); // Send no content response
+    } catch (error) {
+        console.error('Error resuming playback:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error resuming playback', error: error.message });
+    }
+};
+
+// Seek to a specific position in the track
+const seek_playback = async (req, res) => {
+    const access_token = req.session.access_token;
+    const { position_ms } = req.body;
+
+    try {
+        // Seek to the specified position in the track
+        await axios.put(`https://api.spotify.com/v1/me/player/seek?position_ms=${position_ms}`, {}, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        res.status(204).send(); // Send no content response
+    } catch (error) {
+        console.error('Error seeking playback:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error seeking playback', error: error.message });
+    }
+};
+
 module.exports = {
-    get_spotify_auth_url,
-    spotify_callback,
-    search_tracks,
+    generate_spotify_auth_url,
+    handle_spotify_callback,
+    create_spotify_playlist,
+    get_user_playlists,
+    search_spotify,
+    play_track,
+    pause_playback,
+    resume_playback,
+    seek_playback,
 };
