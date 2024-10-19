@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import './App.css'; // Ensure your styles are imported
 
-const track = {
+const defaultTrack = {
   name: '',
   album: {
     images: [
@@ -12,12 +13,14 @@ const track = {
   ]
 };
 
-function WebPlayback(props) {
+function WebPlayback({ token }) {
   const [player, setPlayer] = useState(undefined);
-  const [is_paused, setPaused] = useState(false);
-  const [is_active, setActive] = useState(false);
-  const [current_track, setTrack] = useState(track);
+  const [currentTrack, setTrack] = useState(defaultTrack);
+  const [isPaused, setPaused] = useState(false);
+  const [volume, setVolume] = useState(50);
+  const [repeatMode, setRepeatMode] = useState('off');
 
+  // Initialize Spotify Player SDK
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -27,10 +30,8 @@ function WebPlayback(props) {
     window.onSpotifyWebPlaybackSDKReady = () => {
       const player = new window.Spotify.Player({
         name: 'Web Playback SDK',
-        getOAuthToken: (cb) => {
-          cb(props.token);
-        },
-        volume: 0.5
+        getOAuthToken: (cb) => { cb(token); },
+        volume: 0.5,
       });
 
       setPlayer(player);
@@ -44,16 +45,10 @@ function WebPlayback(props) {
       });
 
       player.addListener('player_state_changed', (state) => {
-        if (!state) {
-          return;
-        }
+        if (!state) return;
 
         setTrack(state.track_window.current_track);
         setPaused(state.paused);
-
-        player.getCurrentState().then((state) => {
-          !state ? setActive(false) : setActive(true);
-        });
       });
 
       player.connect();
@@ -64,35 +59,53 @@ function WebPlayback(props) {
         player.disconnect();
       }
     };
-  }, [props.token]);
+  }, [token]);
+
+  // Adjust volume
+  const adjustVolume = (e) => {
+    const newVolume = e.target.value;
+    setVolume(newVolume);
+    if (player) {
+      player.setVolume(newVolume / 100);
+    }
+  };
+
+  // Toggle repeat modes
+  const toggleRepeatMode = () => {
+    const modes = ['off', 'context', 'track'];
+    const nextMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+    setRepeatMode(nextMode);
+    fetch(`https://api.spotify.com/v1/me/player/repeat?state=${nextMode}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  };
 
   return (
-    <>
-      <div className="player-container">
-        <div className="main-wrapper">
-          <img
-            src={current_track.album.images[0].url}
-            className="now-playing__cover"
-            alt=""
-          />
-          <div className="now-playing__side">
-            <div className="now-playing__name">{current_track.name}</div>
-            <div className="now-playing__artist">{current_track.artists[0].name}</div>
-          </div>
-          <div className="controls">
-            <button className="btn-spotify" onClick={() => { player.previousTrack(); }}>
-              &lt;&lt;
-            </button>
-            <button className="btn-spotify" onClick={() => { player.togglePlay(); }}>
-              {is_paused ? 'PLAY' : 'PAUSE'}
-            </button>
-            <button className="btn-spotify" onClick={() => { player.nextTrack(); }}>
-              &gt;&gt;
-            </button>
-          </div>
+    <div className="player-container">
+      <div className="main-wrapper">
+        <img src={currentTrack.album.images[0]?.url} alt="Album Cover" className="now-playing__cover" />
+        <div className="now-playing__side">
+          <div className="now-playing__name">{currentTrack.name}</div>
+          <div className="now-playing__artist">{currentTrack.artists[0]?.name}</div>
+        </div>
+
+        <div className="controls">
+          <button className="btn-spotify" onClick={() => player.previousTrack()}>&lt;&lt;</button>
+          <button className="btn-spotify" onClick={() => player.togglePlay()}>{isPaused ? 'PLAY' : 'PAUSE'}</button>
+          <button className="btn-spotify" onClick={() => player.nextTrack()}>&gt;&gt;</button>
+        </div>
+
+        <div className="volume-control">
+          <input type="range" min="0" max="100" value={volume} onChange={adjustVolume} />
+          <span>Volume: {volume}%</span>
+        </div>
+
+        <div className="repeat-control">
+          <button className="btn-spotify" onClick={toggleRepeatMode}>Repeat: {repeatMode.toUpperCase()}</button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

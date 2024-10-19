@@ -1,3 +1,68 @@
+/* App container layout */
+.app-container {
+  display: flex;
+  height: 100vh; /* Ensure the app takes up the full viewport height */
+  background-color: #282c34; /* Background color for the entire app */
+}
+
+/* Content container for dynamic pages (like profile, playlists, etc.) */
+.content-container {
+  flex-grow: 1; /* Ensure this takes up remaining space next to the sidebar */
+  padding: 20px;
+  background-color: #282c34; /* Match background color with the app */
+  display: flex; /* Use flex to position the player */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+
+/* Player container, centers the player in its section */
+.player-container {
+  flex-grow: 1; /* Allow the player to fill available space */
+  display: flex;
+  justify-content: center; /* Center player horizontally */
+  align-items: center; /* Center player vertically */
+  background-color: #1e1e1e; /* Dark background for the player area */
+}
+
+/* Main player layout */
+.main-wrapper {
+  text-align: center; /* Center text inside the player */
+  background-color: #333; /* Dark gray background for the player */
+  padding: 30px;
+  border-radius: 10px; /* Rounded corners for the player box */
+  color: white; /* White text for contrast */
+  width: 300px; /* Fixed width for the player */
+}
+
+/* Now playing album cover styling */
+.now-playing__cover {
+  width: 100%; /* Album cover takes full width of the player */
+  border-radius: 10px; /* Rounded corners for the cover image */
+}
+
+/* Controls for the player */
+.controls {
+  display: flex;
+  justify-content: space-around; /* Evenly space out controls */
+  margin-top: 20px; /* Add some space above the controls */
+}
+
+/* Volume control */
+.volume-control {
+  margin-top: 20px; /* Add space above the volume control */
+}
+
+/* Repeat control */
+.repeat-control {
+  margin-top: 10px; /* Add space above the repeat control */
+}
+
+/* Range input (volume slider) styling */
+input[type="range"] {
+  width: 100%; /* Make the range slider span the full width */
+  margin: 10px 0; /* Add some margin above and below the slider */
+}
+
 /* Centering the login content */
 .login-container {
   display: flex;
@@ -34,69 +99,6 @@
 }
 
 /* Add hover effect for the login button */
-.btn-spotify:hover {
-  background-color: #1ed760;
-}
-
-/* Centering the player in the viewport */
-.player-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #282c34;
-}
-
-/* Main player wrapper styling */
-.main-wrapper {
-  text-align: center;
-  background-color: #1c1e22;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-  width: 300px;
-  color: white;
-}
-
-/* Styling for the album cover */
-.now-playing__cover {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-/* Track information styles */
-.now-playing__side {
-  margin-bottom: 20px;
-}
-
-.now-playing__name {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.now-playing__artist {
-  color: #b3b3b3;
-}
-
-/* Control buttons styling */
-.controls {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-
-.btn-spotify {
-  background-color: #1DB954;
-  color: white;
-  font-size: 1rem;
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
 .btn-spotify:hover {
   background-color: #1ed760;
 }
