@@ -1,4 +1,18 @@
-/* Simple styling for the app */
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -10,19 +24,15 @@
   color: white;
 }
 
-.btn-spotify {
-  background-color: #1db954;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 50px;
-  font-size: 16px;
-  text-decoration: none;
-  margin: 20px;
+.App-link {
+  color: #61dafb;
 }
 
-.controls {
-  display: flex;
-  justify-content: space-between;
-  width: 200px;
-  margin: 20px;
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

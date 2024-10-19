@@ -1,83 +1,95 @@
-// Import required dependencies
 const express = require('express');
 const dotenv = require('dotenv');
-const axios = require('axios');
 const path = require('path');
+const URLSearchParams = require('url').URLSearchParams;
+const request = require('request');
 
-// Load environment variables from .env file
 dotenv.config();
 
-const app = express(); // Create an instance of Express
-const port = process.env.PORT || 5000; // Set port from environment variable or default to 5000
+const port = 5000;
 
-// Spotify client credentials
-const spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
-const spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+// Spotify credentials from the .env file
+var spotify_client_id = process.env.SPOTIFY_CLIENT_ID;
+var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 
-// Serve the static React frontend from the build folder
+var access_token = ''; // To store the Spotify access token
+
+var app = express();
+
+// Serve the static files from the React app build folder
 app.use(express.static(path.join(__dirname, '../build')));
 
-// Helper function to generate a random string for state parameter
-function generateRandomString(length) {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < length; i++) {
+// Function to generate a random string for the state parameter
+var generateRandomString = function (length) {
+  var text = '';
+  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
-  return text; // Return the generated string
-}
+  return text;
+};
 
-// Route to initiate Spotify login (OAuth PKCE flow)
+// Route for Spotify login
 app.get('/auth/login', (req, res) => {
-  const scope = 'streaming user-read-email user-read-private'; // Define the required scopes
-  const state = generateRandomString(16); // Generate a random state string
+  var scope = 'streaming user-read-email user-read-private'; // Spotify permissions
+  var state = generateRandomString(16); // Generate a random state to prevent CSRF attacks
 
-  // Construct the authorization query parameters
-  const authQueryParams = new URLSearchParams({
+  var auth_query_parameters = new URLSearchParams({
     response_type: 'code',
     client_id: spotify_client_id,
     scope: scope,
-    redirect_uri: 'http://localhost:3000/auth/callback', // Redirect URI after login
-    state: state,
+    redirect_uri: 'http://localhost:5000/auth/callback', // Redirect URI must match with Spotify dashboard
+    state: state
   });
 
-  // Redirect to Spotify's authorization page
-  res.redirect(`https://accounts.spotify.com/authorize?${authQueryParams.toString()}`);
+  // Redirect to Spotify's authorization endpoint
+  res.redirect('https://accounts.spotify.com/authorize/?' + auth_query_parameters.toString());
 });
 
-// Callback route to handle Spotify OAuth callback
-app.get('/auth/callback', async (req, res) => {
-  const code = req.query.code; // Get the authorization code from the query parameters
+// Callback route for Spotify
+app.get('/auth/callback', (req, res) => {
+  var code = req.query.code; // Get the authorization code from query params
 
-  try {
-    // Exchange the authorization code for an access token
-    const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', new URLSearchParams({
+  // Spotify token exchange options
+  var authOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    form: {
       code: code,
-      redirect_uri: 'http://localhost:3000/auth/callback',
-      grant_type: 'authorization_code',
-    }).toString(), {
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${spotify_client_id}:${spotify_client_secret}`).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
+      redirect_uri: "http://localhost:5000/auth/callback", // Should match with the redirect URI
+      grant_type: 'authorization_code'
+    },
+    headers: {
+      'Authorization': 'Basic ' + (Buffer.from(spotify_client_id + ':' + spotify_client_secret).toString('base64')),
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    json: true
+  };
 
-    const access_token = tokenResponse.data.access_token; // Extract access token from response
-
-    // Instead of redirecting with token in the URL, we will send the token to the frontend
-    res.redirect(`/dashboard?token=${access_token}`); // Redirect to dashboard with token as a query parameter
-  } catch (error) {
-    console.error('Error fetching access token:', error);
-    res.status(500).json({ message: 'Error fetching access token' }); // Handle errors
-  }
+  // Request to exchange authorization code for access token
+  request.post(authOptions, function (error, response, body) {
+    if (!error && response.statusCode === 200) {
+      access_token = body.access_token; // Store the access token
+      res.redirect('/'); // Redirect to the homepage after successful login
+    } else {
+      res.status(response.statusCode).send("Failed to authenticate with Spotify");
+    }
+  });
 });
 
-// Route to serve the React app for any other routes
+// Route to return the access token as JSON
+app.get('/auth/token', (req, res) => {
+  res.json({
+    access_token: access_token // Respond with the stored access token
+  });
+});
+
+// Catch-all route to serve the React app for any unmatched routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build/index.html')); // Serve the main HTML file
+  res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
-// Start the server
+// Start the Express server
 app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`); // Log server start message
+  console.log(`Listening at http://localhost:${port}`);
 });
