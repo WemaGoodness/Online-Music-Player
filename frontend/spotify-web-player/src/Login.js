@@ -1,15 +1,18 @@
 import React from 'react';
+import './App.css';
+import spotifyLogo from './Spotify_Full_Logo_RGB_White.png';
 
 function Login() {
-    return (
-        <div className="App">
-            <header className="App-header">
-                <a className="btn-spotify" href="/auth/login" >
-                    Login with Spotify 
-                </a>
-            </header>
-        </div>
-    );
+  return (
+    <div className="login-container">
+      <header className="login-header">
+        <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo" />
+        <a className="btn-spotify" href="/auth/login">
+          Login with Spotify
+        </a>
+      </header>
+    </div>
+  );
 }
 
 export default Login;
