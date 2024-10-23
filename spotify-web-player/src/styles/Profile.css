@@ -1,0 +1,21 @@
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+  background-color: #121212; /* Ensure background is Spotify black */
+  text-align: center;
+}
+
+.profile-image {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 20px;
+}
+
+h1, p {
+  margin: 10px 0;
+}

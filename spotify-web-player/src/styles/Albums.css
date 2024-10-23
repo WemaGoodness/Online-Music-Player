@@ -1,0 +1,38 @@
+/* Albums, Artists, and Tracks shared styles */
+.albums-container, .artists-container, .tracks-container {
+  padding: 20px;
+  background-color: #121212;
+  color: white;
+}
+
+.albums-grid, .artists-grid, .tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.album-item, .artist-item, .track-item {
+  background-color: #181818;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.album-item img, .artist-item img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Track audio features */
+.track-features, .artist-albums {
+  margin-top: 20px;
+}
+
+.track-item {
+  cursor: pointer;
+  color: white;
+}
+
+.feature-item {
+  margin-top: 10px;
+}

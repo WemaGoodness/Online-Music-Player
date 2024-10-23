@@ -1,0 +1,40 @@
+.search-container {
+  margin: 20px;
+}
+
+.search-container input,
+.search-container select {
+  padding: 10px;
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+.search-container button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #1db954;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Container for search results */
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Increased gap for better spacing */
+  padding: 20px; /* Added padding */
+  background-color: #121212; /* Spotify black */
+}
+
+.results img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px; /* Added border radius for image */
+}
+
+.results p {
+  text-align: center;
+  color: white; /* Changed text color to white */
+}

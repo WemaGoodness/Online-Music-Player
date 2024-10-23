@@ -1,0 +1,122 @@
+/* App container layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  background-color: #121212;
+  overflow: hidden;
+}
+
+/* Content container for dynamic pages (like profile, playlists, etc.) */
+.content-container {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #121212;
+  overflow-y: auto;
+  margin-left: 200px; /* Ensure content does not hide behind the sidebar */
+  margin-right: 370px; /* Leave space for the player on the right */
+}
+
+/* Player container */
+.player-container {
+  position: fixed; /* Fix the player on the right side */
+  right: 0;
+  top: 0;
+  height: 100vh; /* Player takes up full height of the page */
+  width: 350px; /* Define the player's width */
+  background-color: #121212; /* Spotify black */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure player is above other content */
+}
+
+/* Main player layout */
+.main-wrapper {
+  text-align: center;
+  background-color: #121212;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  width: 100%;
+}
+
+/* Now playing album cover styling */
+.now-playing__cover {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* Controls for the player */
+.controls {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+/* Seek and volume control aligned */
+.control-sliders {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Volume control */
+.volume-control {
+  margin-top: 10px;
+}
+
+/* Seek control */
+.seek-control {
+  margin-top: 10px;
+}
+
+/* Range input (volume and seek slider) styling */
+input[type="range"] {
+  width: 100%;
+  appearance: none;
+  background: transparent;
+  margin: 0;
+}
+
+/* Track styling */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #1DB954;
+  border-radius: 3px;
+}
+
+/* Thumb styling */
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Focus styling */
+input[type="range"]:focus {
+  outline: none;
+}
+
+/* Adjust the login container */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+}
+
+/* Adjust for the sidebar */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background-color: #121212;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999; /* Sidebar is behind the player */
+}
