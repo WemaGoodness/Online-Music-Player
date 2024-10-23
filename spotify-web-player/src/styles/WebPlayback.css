@@ -1,40 +1,42 @@
-/* Player container */
 .player-container {
-  position: fixed;
-  right: 0;
-  top: 0;
-  height: 100vh;
-  width: 350px;
-  background-color: #121212; /* Spotify black */
+  position: fixed; /* Fix the player to the screen */
+  right: 0; /* Align it to the right */
+  top: 0; /* Align it to the top */
+  width: 300px; /* Adjust the width as needed */
+  height: 100%; /* Full height to stick to the side */
+  background-color: #282828; /* Optional: Customize the background */
+  z-index: 1000; /* Ensure it stays on top of other content */
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure player is above other content */
 }
 
 .main-wrapper {
+  padding: 20px;
   text-align: center;
-  background-color: #333;
-  padding: 30px;
-  border-radius: 10px;
-  color: white;
-  width: 100%;
 }
 
 .now-playing__cover {
   width: 100%;
+  height: auto;
   border-radius: 10px;
 }
 
-.controls {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
+.controls button {
+  margin: 5px;
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
 }
 
-.control-sliders {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 20px;
+.volume-control,
+.seek-control {
+  margin: 15px 0;
+}
+
+input[type="range"] {
+  width: 100%;
 }

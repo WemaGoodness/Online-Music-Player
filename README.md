@@ -1,5 +1,3 @@
----
-
 # **Online-Music-Player**
 
 ## Introduction
@@ -74,8 +72,6 @@ Before running the server, you need to build the React frontend:
 
 ```bash
 npm run build
-
-serve -s build
 ```
 
 ### **6. Run the Application**

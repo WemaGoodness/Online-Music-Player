@@ -41,6 +41,7 @@ function Tracks({ token }) {
       <div className="tracks-grid">
         {tracks.map((track) => (
           <div key={track.track.id} className="track-item" onClick={() => fetchTrackAudioFeatures(track.track.id)}>
+            <img src={track.track.album.images[0]?.url} alt="Album Cover" className="track-image" />
             <p>{track.track.name}</p>
             <p>{track.track.artists[0]?.name}</p>
           </div>

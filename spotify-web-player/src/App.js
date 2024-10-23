@@ -35,7 +35,6 @@ function App() {
           <Sidebar /> {/* Sidebar with links to sections */}
           <div className="content-container">
             <Routes>
-              <Route path="/" element={<WebPlayback token={token} />} /> {/* Now Playing */}
               <Route path="/profile" element={<Profile token={token} />} /> {/* Profile */}
               <Route path="/playlists" element={<Playlists token={token} />} /> {/* Playlists */}
               <Route path="/albums" element={<Albums token={token} />} /> {/* Albums */}
@@ -44,7 +43,8 @@ function App() {
               <Route path="/search" element={<Search token={token} />} /> {/* Search */}
             </Routes>
           </div>
-          <WebPlayback token={token} /> {/* Player always visible */}
+          {/* WebPlayback component always visible on the right */}
+          <WebPlayback token={token} />
         </div>
       )}
     </Router>

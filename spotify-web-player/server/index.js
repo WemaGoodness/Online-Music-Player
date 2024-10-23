@@ -31,7 +31,7 @@ const generateRandomString = (length) => {
 
 // Spotify Login Route
 app.get('/auth/login', (req, res) => {
-  const scope = 'user-read-private user-read-email user-library-modify user-library-read user-follow-read user-follow-modify user-read-recently-played user-read-playback-position playlist-modify-public playlist-modify-private streaming'; 
+  const scope = 'user-read-private user-read-email user-library-modify user-library-read user-follow-read user-follow-modify user-read-recently-played user-read-playback-position playlist-modify-public playlist-modify-private streaming user-read-playback-state user-modify-playback-state streaming'; 
   const state = generateRandomString(16); // State to prevent CSRF
 
   const authQueryParams = new URLSearchParams({
