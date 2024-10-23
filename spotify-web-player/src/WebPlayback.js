@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faForward, faBackward } from '@fortawesome/free-solid-svg-icons';
-import './styles/App.css'; // Ensure your styles are imported
+import './styles/WebPlayback.css'; // Import the WebPlayback specific styles
 
 const defaultTrack = {
   name: '',
@@ -41,20 +41,18 @@ function WebPlayback({ token }) {
 
       player.connect();
 
-      // Update the seek bar in real-time
       const interval = setInterval(() => {
         player.getCurrentState().then((state) => {
           if (state && !state.paused) {
             setTrackProgress(state.position);
           }
         });
-      }, 500); // Update every 0.5 second for smooth transitions
+      }, 500); // Update every 0.5 second
 
       return () => clearInterval(interval);
     };
   }, [token]);
 
-  // Seek to position function
   const seekToPosition = (positionMs) => {
     fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${positionMs}`, {
       method: 'PUT',
@@ -66,7 +64,6 @@ function WebPlayback({ token }) {
     });
   };
 
-  // Adjust volume function
   const adjustVolume = (e) => {
     const newVolume = e.target.value;
     setVolume(newVolume);

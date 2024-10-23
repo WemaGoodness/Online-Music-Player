@@ -2,18 +2,63 @@
 .app-container {
   display: flex;
   height: 100vh;
-  background-color: #121212;
-  overflow: hidden;
+  background-color: #121212; /* Spotify black background */
+  overflow: hidden; /* Prevent content overflow */
 }
 
 /* Content container for dynamic pages (like profile, playlists, etc.) */
 .content-container {
   flex-grow: 1;
   padding: 20px;
-  background-color: #121212;
-  overflow-y: auto;
+  background-color: #121212; /* Spotify black */
+  overflow-y: auto; /* Allow vertical scrolling */
   margin-left: 200px; /* Ensure content does not hide behind the sidebar */
   margin-right: 370px; /* Leave space for the player on the right */
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background-color: #121212;
+  color: white;
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  z-index: 999; /* Ensure sidebar is behind the player */
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0; /* Remove default padding */
+}
+
+.sidebar ul li {
+  padding: 15px 0; /* Padding for each item */
+  font-size: 1.2rem; /* Font size */
+  display: flex; /* Flex layout for icon and text */
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 20px; /* Add spacing between list items */
+}
+
+.sidebar ul li:hover {
+  color: #1ed760; /* Hover color */
+}
+
+.sidebar ul li a {
+  text-decoration: none; /* Remove text underline */
+  color: inherit; /* Ensure link inherits hover color */
+}
+
+.sidebar ul li a:hover {
+  text-decoration: underline; /* Add underline on hover */
+}
+
+.sidebar ul li svg {
+  margin-right: 10px; /* Space between icon and text */
 }
 
 /* Player container */
@@ -33,60 +78,62 @@
 /* Main player layout */
 .main-wrapper {
   text-align: center;
-  background-color: #121212;
-  padding: 20px;
-  border-radius: 10px;
-  color: white;
-  width: 100%;
+  background-color: #333; /* Dark gray background for the player */
+  padding: 30px;
+  border-radius: 10px; /* Rounded corners for the player box */
+  color: white; /* White text for contrast */
+  width: 100%; /* Player takes full width of its container */
 }
 
 /* Now playing album cover styling */
 .now-playing__cover {
-  width: 100%;
-  border-radius: 10px;
+  width: 100%; /* Album cover takes full width of the player */
+  border-radius: 10px; /* Rounded corners for the cover image */
 }
 
 /* Controls for the player */
 .controls {
   display: flex;
-  justify-content: space-around;
-  margin-top: 10px;
+  justify-content: space-around; /* Evenly space out controls */
+  margin-top: 20px; /* Add some space above the controls */
 }
 
-/* Seek and volume control aligned */
+button {
+  background-color: #1DB954;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1ed760;
+}
+
+/* Volume and seek control aligned */
 .control-sliders {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 10px;
-}
-
-/* Volume control */
-.volume-control {
-  margin-top: 10px;
-}
-
-/* Seek control */
-.seek-control {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 /* Range input (volume and seek slider) styling */
 input[type="range"] {
-  width: 100%;
+  width: 100%; /* Make the range slider span the full width */
   appearance: none;
   background: transparent;
   margin: 0;
 }
 
-/* Track styling */
 input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   background: #1DB954;
   border-radius: 3px;
 }
 
-/* Thumb styling */
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 12px;
@@ -101,22 +148,44 @@ input[type="range"]:focus {
   outline: none;
 }
 
-/* Adjust the login container */
+/* Login Page */
+
+/* Centering the login content */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: black;
+  height: 100vh; /* Full viewport height */
+  background-color: black; /* Set background to black */
 }
 
-/* Adjust for the sidebar */
-.sidebar {
-  width: 200px;
-  height: 100vh;
-  background-color: #121212;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 999; /* Sidebar is behind the player */
+/* Login header styling to stack items */
+.login-header {
+  display: flex;
+  flex-direction: column; /* Stack logo and button vertically */
+  align-items: center; /* Center items horizontally */
+}
+
+/* Logo styling */
+.spotify-logo {
+  width: 300px;
+  margin-bottom: 20px; /* Add space between logo and button */
+}
+
+/* Styling for the Spotify login button */
+.btn-spotify {
+  background-color: #1DB954;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 15px 30px;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+/* Add hover effect for the login button */
+.btn-spotify:hover {
+  background-color: #1ed760;
 }

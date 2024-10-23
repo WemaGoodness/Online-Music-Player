@@ -9,15 +9,13 @@ import Search from './Search';
 import Albums from './Albums';
 import Artists from './Artists';
 import Tracks from './Tracks';
-import './styles/App.css';
+import './styles/App.css'; // Main layout styles
 import './styles/Sidebar.css';
-import './styles/Search.css';
-import './styles/Playlists.css';
+import './styles/WebPlayback.css'; // Import WebPlayback styles
 
 function App() {
   const [token, setToken] = useState(''); // State to store the Spotify access token
 
-  // Fetch the token when the component mounts
   useEffect(() => {
     async function getToken() {
       const response = await fetch('/auth/token'); // Fetch token from server
@@ -46,6 +44,7 @@ function App() {
               <Route path="/search" element={<Search token={token} />} /> {/* Search */}
             </Routes>
           </div>
+          <WebPlayback token={token} /> {/* Player always visible */}
         </div>
       )}
     </Router>
