@@ -1,98 +1,152 @@
-# Online Music Player
+---
 
-## Overview
+# **Online-Music-Player**
 
-The Online Music Player is a web application that allows users to log in with their Spotify account and view their profile information along with their top tracks. This application leverages the Spotify Web API to fetch user data and provides an interactive dashboard to display music preferences.
+## Introduction
 
-## Features
+**Online-Music-Player** is a full-fledged music streaming web application that integrates with the Spotify API. It allows users to authenticate using their Spotify account, view and manage their playlists, browse artists and albums, search for music, and control playback directly within the app. Built with React for the frontend and Express for the backend, this application offers a seamless experience for music lovers by leveraging Spotify's vast library of tracks.
 
-- **User  Authentication**: Secure login using Spotify's OAuth 2.0.
-- **User  Profile**: Display user information such as name, email, and profile picture.
-- **Top Tracks**: Fetch and display the user's top tracks from Spotify.
-- **Responsive Design**: Optimized for both desktop and mobile devices.
+Key features include:
+- User authentication via Spotify.
+- Real-time music playback with volume and seek control.
+- Search functionality for tracks, albums, and artists.
+- View and manage playlists.
+- Save or remove tracks from user’s library.
+- Explore new releases and related artists.
+  
+This project is a dynamic web application, meaning it handles backend operations such as Spotify API communication and serves the React frontend via Express.
 
-## Technologies Used
+## **Technologies Used**
+- **React** (Frontend)
+- **Node.js** and **Express.js** (Backend)
+- **Spotify Web API** for music data
+- **CSS** (Styling)
 
-- **Frontend**: 
-  - React.js
-  - React Router
-  - Axios for API requests
-  - CSS for styling
+---
 
-- **Backend**: 
-  - Node.js
-  - Express.js
-  - Axios for server-side API requests
-  - dotenv for environment variable management
+## **Installation**
 
-- **API**: 
-  - Spotify Web API
+Follow these steps to set up and run the project on your local machine:
 
-## Getting Started
+### **1. Prerequisites**
+- **Node.js** and **npm** installed (You can download from [here](https://nodejs.org/))
+- A **Spotify Developer account** with client ID and client secret (Create an app at the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/)).
 
-### Prerequisites
+### **2. Clone the Repository**
 
-- Node.js (v14 or above)
-- npm (v6 or above)
-- A Spotify Developer Account to create an application and obtain client credentials.
+Clone the repository to your local machine using Git:
 
-### Installation
+```bash
+git clone https://github.com/WemaGoodness/Online-Music-Player.git
+cd Online-Music-Player/spotify-web-player
+```
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/online-music-player.git
-   cd online-music-player
-   ```
+### **3. Set Up Environment Variables**
 
-2. **Install backend dependencies**:
-   Navigate to the backend folder and install the dependencies:
-   ```bash
-   cd backend
-   npm install
-   ```
-3. **Set up environment variables**:
-   Create a `.env` file in the backend directory and add your Spotify credentials:
+Create a `.env` file in the project root directory with the following details:
 
-   ```plaintext
-   SPOTIFY_CLIENT_ID=your_spotify_client_id
-   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-   ```
-4. **Build the frontend**:
-   Navigate to the frontend folder and install the dependencies:
+```bash
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+REDIRECT_URI=http://localhost:5000/auth/callback
+```
 
-   ```bash
-   cd ../frontend
-   npm install
-   npm run build
-   ```
-5. **Run the backend server**
-   Navigate back to the backend directory and start the server:
+Make sure to replace the placeholders with your actual Spotify credentials.
 
-   ```bash
-   cd ../backend
-   node index.js
-   ```
-## Access the application
-Open your browser and navigate to `http://localhost:5000` to view the application.
+Copy the `.env` file to the `src/` and `server/` folders:
 
-## Usage
-- Click on the "Login with Spotify" button to authenticate.
-- After successful login, you will be redirected to the dashboard displaying your profile information and top tracks.
+```bash
+cp .env src/
+cp .env server/
+```
 
-## Contributing
-Contributions are welcome! If you have suggestions for improvements or want to report a bug, please create an issue or submit a pull request.
+### **4. Install Dependencies**
 
-### Steps to Contribute
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Make your changes and commit them (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
+Run the following command to install all the required dependencies for both the frontend and backend:
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+```bash
+npm install
+```
 
-## Acknowledgments
-- **Spotify Developer** for providing the API.
-- **React** for building the frontend.
-- **Node.js** and **Express** for the backend server.
+### **5. Build the React App**
+
+Before running the server, you need to build the React frontend:
+
+```bash
+npm run build
+
+serve -s build
+```
+
+### **6. Run the Application**
+
+Start the server in another terminal (located in the server folder) to serve both the backend API and the React frontend:
+
+```bash
+node index.js
+```
+
+By default, the app will run on **http://localhost:5000**. You can access the application from your browser at that address.
+
+---
+
+## **Usage**
+
+Once the application is running:
+
+1. **Login with Spotify**: When you first visit the app, you’ll need to authenticate with your Spotify account. This allows the app to access your playlists, liked songs, and control music playback.
+   
+2. **Browse and Play Music**: 
+   - **Now Playing**: Control music playback, adjust volume, and seek through tracks.
+   - **Search**: Search for tracks, albums, and artists using the search bar.
+   - **Playlists**: View and manage your Spotify playlists.
+   - **Tracks**: View and save/remove tracks in your library.
+   - **Albums/Artists**: Explore albums and artists, view tracks, and discover related artists.
+
+3. **Play Controls**: The app supports play/pause, previous/next track, volume control, and seeking to a specific point in the song.
+
+---
+
+## **Contributing**
+
+Contributions are welcome! Here's how you can help:
+
+1. **Fork the repository**.
+2. **Create a feature branch** (`git checkout -b new-feature`).
+3. **Commit your changes** (`git commit -m "Add new feature"`).
+4. **Push to the branch** (`git push origin new-feature`).
+5. **Open a Pull Request**.
+
+Please ensure that your code follows the project's coding standards and includes appropriate documentation.
+
+---
+
+## **Related Projects**
+
+Here are some related projects and references that might be helpful:
+
+1. **Spotify Web API Documentation**: [Spotify Web API](https://developer.spotify.com/documentation/web-api/)
+2. **Building a Music Player in React (GeeksForGeeks)**: [Building a Music Player in React](https://www.geeksforgeeks.org/building-a-music-player-in-react/#:~:text=The%20%E2%80%9CMusic%20Player%E2%80%9D%20project%20is,users%20to%20enjoy%20their%20songs.)
+3. **Create a Music Player using JavaScript (GeeksForGeeks)**: [Create a Music Player using JavaScript](https://www.geeksforgeeks.org/create-a-music-player-using-javascript/)
+4. **YouTube Tutorial on Spotify Integration**: [YouTube Video](https://www.youtube.com/watch?v=2if5xSaZJlg)
+
+---
+
+## **Licensing**
+
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute this software in both personal and commercial projects, as long as you include the original license.
+
+For more details, refer to the LICENSE file.
+
+---
+
+## **References**
+
+- [Spotify Web API Documentation](https://developer.spotify.com/documentation/web-api)
+- [YouTube - Spotify Web Player SDK Integration](https://www.youtube.com/watch?v=2if5xSaZJlg)
+- [GeeksForGeeks - Building a Music Player in React](https://www.geeksforgeeks.org/building-a-music-player-in-react/#:~:text=The%20%E2%80%9CMusic%20Player%E2%80%9D%20project%20is,users%20to%20enjoy%20their%20songs.)
+- [GeeksForGeeks - Create a Music Player using JavaScript](https://www.geeksforgeeks.org/create-a-music-player-using-javascript/)
+
+---
+
+
