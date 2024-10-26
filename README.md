@@ -48,6 +48,7 @@ Create a `.env` file in the server directory with the following details:
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 REDIRECT_URI=http://localhost:5000/auth/callback
+MONGODB_URI=mongodb://localhost:27017/spotifydb
 ```
 
 Make sure to replace the placeholders with your actual Spotify credentials.
