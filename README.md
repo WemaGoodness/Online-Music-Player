@@ -41,7 +41,7 @@ cd Online-Music-Player/spotify-web-player
 
 ### **3. Set Up Environment Variables**
 
-Create a `.env` file in the project root directory with the following details:
+Create a `.env` file in the server directory with the following details:
 
 ```bash
 SPOTIFY_CLIENT_ID=your_spotify_client_id
@@ -50,13 +50,6 @@ REDIRECT_URI=http://localhost:5000/auth/callback
 ```
 
 Make sure to replace the placeholders with your actual Spotify credentials.
-
-Copy the `.env` file to the `src/` and `server/` folders:
-
-```bash
-cp .env src/
-cp .env server/
-```
 
 ### **4. Install Dependencies**
 
