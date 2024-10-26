@@ -6,6 +6,7 @@ const path = require('path');
 dotenv.config(); // Load environment variables
 const app = express();
 const port = 5000; // Server porti
+const mongoURI = process.env.MONGO_URI
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

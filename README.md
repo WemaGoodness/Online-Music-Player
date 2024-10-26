@@ -87,14 +87,16 @@ Once the application is running:
 
 1. **Login with Spotify**: When you first visit the app, you’ll need to authenticate with your Spotify account. This allows the app to access your playlists, liked songs, and control music playback.
    
-2. **Browse and Play Music**: 
+2. **Transfer Playback**: Use your mobile device to transfer playback using the spotify mobile app.
+
+3. **Browse and Play Music**: 
    - **Now Playing**: Control music playback, adjust volume, and seek through tracks.
    - **Search**: Search for tracks, albums, and artists using the search bar.
    - **Playlists**: View and manage your Spotify playlists.
    - **Tracks**: View and save/remove tracks in your library.
    - **Albums/Artists**: Explore albums and artists, view tracks, and discover related artists.
 
-3. **Play Controls**: The app supports play/pause, previous/next track, volume control, and seeking to a specific point in the song.
+4. **Play Controls**: The app supports play/pause, previous/next track, volume control, and seeking to a specific point in the song.
 
 ---
 
