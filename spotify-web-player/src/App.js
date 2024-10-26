@@ -15,7 +15,9 @@ import './styles/WebPlayback.css'; // Import WebPlayback styles
 
 function App() {
   const [token, setToken] = useState(''); // State to store the Spotify access token
+  const [playTrack, setPlayTrack] = useState(null); // State to hold playTrack function from WebPlayback
 
+  // Fetch Spotify access token on component mount
   useEffect(() => {
     async function getToken() {
       const response = await fetch('/auth/token'); // Fetch token from server
@@ -36,15 +38,24 @@ function App() {
           <div className="content-container">
             <Routes>
               <Route path="/profile" element={<Profile token={token} />} /> {/* Profile */}
-              <Route path="/playlists" element={<Playlists token={token} />} /> {/* Playlists */}
+              <Route
+                path="/playlists"
+                element={<Playlists token={token} playTrack={playTrack} />} // Pass playTrack to Playlists
+              />
               <Route path="/albums" element={<Albums token={token} />} /> {/* Albums */}
               <Route path="/artists" element={<Artists token={token} />} /> {/* Artists */}
-              <Route path="/tracks" element={<Tracks token={token} />} /> {/* Tracks */}
-              <Route path="/search" element={<Search token={token} />} /> {/* Search */}
+              <Route
+                path="/tracks"
+                element={<Tracks token={token} playTrack={playTrack} />} // Pass playTrack to Tracks
+              />
+              <Route
+                path="/search"
+                element={<Search token={token} playTrack={playTrack} />} // Pass playTrack to Search
+              />
             </Routes>
           </div>
           {/* WebPlayback component always visible on the right */}
-          <WebPlayback token={token} />
+          <WebPlayback token={token} playTrackProp={setPlayTrack} /> {/* Pass function to set playTrack */}
         </div>
       )}
     </Router>

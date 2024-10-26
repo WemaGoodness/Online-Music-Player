@@ -1,76 +1,64 @@
+// server/controllers/playlists.js
 const express = require('express');
 const request = require('request');
+const Playlist = require('../models/Playlists');
+const Track = require('../models/Tracks');
 const router = express.Router();
+let access_token = ''; // Shared Spotify access token
 
-let access_token = ''; // Shared access token for Spotify API requests
+// Fetch Spotify and MongoDB playlists for a user
+router.get('/user', async (req, res) => {
+  try {
+    // Fetch Spotify playlists
+    const spotifyResponse = await fetchSpotifyPlaylists(access_token);
+    const spotifyPlaylists = spotifyResponse.items;
 
-// Route to get the current user's playlists
-router.get('/user', (req, res) => {
+    // Fetch MongoDB playlists
+    const mongoPlaylists = await Playlist.find({ userId: req.query.userId }).populate('tracks');
+
+    res.json({ spotifyPlaylists, mongoPlaylists });
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching playlists' });
+  }
+});
+
+// Helper to fetch Spotify playlists
+const fetchSpotifyPlaylists = (accessToken) => {
+  return new Promise((resolve, reject) => {
     request.get({
-        url: 'https://api.spotify.com/v1/me/playlists',
-        headers: { Authorization: `Bearer ${access_token}` },
-        json: true,
+      url: 'https://api.spotify.com/v1/me/playlists',
+      headers: { Authorization: `Bearer ${accessToken}` },
+      json: true,
     }, (error, response, body) => {
-        if (error || response.statusCode !== 200) {
-            return res.status(response.statusCode).send('Error fetching user playlists');
-        }
-        res.json(body);
+      if (error || response.statusCode !== 200) reject(error || response.statusCode);
+      resolve(body);
     });
+  });
+};
+
+// Create a new MongoDB playlist
+router.post('/create', async (req, res) => {
+  const { name, description, userId } = req.body;
+  try {
+    const newPlaylist = await Playlist.create({ name, description, userId });
+    res.json(newPlaylist);
+  } catch (error) {
+    res.status(500).json({ error: 'Error creating playlist' });
+  }
 });
 
-// Route to get details of a specific playlist
-router.get('/:id', (req, res) => {
-    const playlistId = req.params.id;
+// Add tracks to MongoDB playlist
+router.post('/:id/tracks', async (req, res) => {
+  const playlistId = req.params.id;
+  const { trackUri, name, album, artists, durationMs, previewUrl } = req.body;
 
-    request.get({
-        url: `https://api.spotify.com/v1/playlists/${playlistId}`,
-        headers: { Authorization: `Bearer ${access_token}` },
-        json: true,
-    }, (error, response, body) => {
-        if (error || response.statusCode !== 200) {
-            return res.status(response.statusCode).send('Error fetching playlist details');
-        }
-        res.json(body);
-    });
-});
-
-// Route to create a new playlist for the current user
-router.post('/create', (req, res) => {
-    const { name, description } = req.body;
-
-    request.post({
-        url: 'https://api.spotify.com/v1/me/playlists',
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, description }),
-    }, (error, response, body) => {
-        if (error || response.statusCode !== 201) {
-            return res.status(response.statusCode).send('Error creating playlist');
-        }
-        res.json(JSON.parse(body));
-    });
-});
-
-// Route to add tracks to a playlist
-router.post('/:id/tracks', (req, res) => {
-    const playlistId = req.params.id;
-    const { uris } = req.body;
-
-    request.post({
-        url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ uris }),
-    }, (error, response, body) => {
-        if (error || response.statusCode !== 201) {
-            return res.status(response.statusCode).send('Error adding tracks to playlist');
-        }
-        res.json(JSON.parse(body));
-    });
+  try {
+    const track = await Track.create({ spotifyUri: trackUri, name, album, artists, durationMs, previewUrl });
+    await Playlist.findByIdAndUpdate(playlistId, { $push: { tracks: track._id } });
+    res.json(track);
+  } catch (error) {
+    res.status(500).json({ error: 'Error adding track to playlist' });
+  }
 });
 
 module.exports = router;

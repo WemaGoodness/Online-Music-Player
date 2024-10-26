@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './styles/Albums.css';
 
-function Albums({ token }) {
+function Albums({ token, playTrack }) {
   const [albums, setAlbums] = useState([]);
   const [albumTracks, setAlbumTracks] = useState([]);
   const [selectedAlbum, setSelectedAlbum] = useState(null);
 
   useEffect(() => {
     if (token) {
-      // Fetch user's saved albums
       fetch('https://api.spotify.com/v1/me/albums', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -22,7 +21,6 @@ function Albums({ token }) {
     }
   }, [token]);
 
-  // Fetch album tracks when an album is selected
   const fetchAlbumTracks = (albumId) => {
     fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
       headers: {
@@ -55,6 +53,7 @@ function Albums({ token }) {
           {albumTracks.map((track) => (
             <div key={track.id} className="track-item">
               <p>{track.name}</p>
+              <button onClick={() => playTrack(track.uri)}>Play</button> {/* Play specific track */}
             </div>
           ))}
         </div>

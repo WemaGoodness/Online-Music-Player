@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faForward, faBackward } from '@fortawesome/free-solid-svg-icons';
-import './styles/WebPlayback.css'; // Import the WebPlayback specific styles
+import './styles/WebPlayback.css';
 
 const defaultTrack = {
   name: '',
@@ -10,12 +10,29 @@ const defaultTrack = {
   duration_ms: 0,
 };
 
-function WebPlayback({ token }) {
+function WebPlayback({ token, playTrackProp }) {
   const [player, setPlayer] = useState(undefined); // Store the player instance
   const [currentTrack, setTrack] = useState(defaultTrack); // Current track details
   const [currentTrackProgress, setTrackProgress] = useState(0); // Track progress
   const [isPaused, setPaused] = useState(false); // Paused or playing state
   const [volume, setVolume] = useState(50); // Volume state
+
+  // Function to play a specific track by URI
+  const playTrack = (trackUri) => {
+    fetch(`https://api.spotify.com/v1/me/player/play`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ uris: [trackUri] }),
+    })
+    .then(response => {
+      if (response.status === 204) {
+        console.log(`Playing track: ${trackUri}`);
+      } else {
+        console.error('Failed to play track');
+      }
+    })
+    .catch(error => console.error('Error playing track:', error));
+  };
 
   // Add the useEffect hook to load the SDK and initialize the player
   useEffect(() => {
@@ -55,11 +72,16 @@ function WebPlayback({ token }) {
       playerInstance.connect();
     };
 
+    // Provide the playTrack function to the parent component via prop
+    if (playTrackProp) {
+      playTrackProp(playTrack);
+    }
+
     // Cleanup the script on component unmount
     return () => {
       document.body.removeChild(script);
     };
-  }, [token]);
+  }, [token, playTrackProp]);
 
   // Function to seek the current track to a specific position
   const seekToPosition = (positionMs) => {

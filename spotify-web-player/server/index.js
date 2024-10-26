@@ -1,10 +1,16 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 const path = require('path');
 
 dotenv.config(); // Load environment variables
 const app = express();
-const port = 5000; // Server port
+const port = 5000; // Server porti
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Importing route handlers from different modules
 const login = require('./auth/login');
