@@ -1,58 +1,74 @@
-import React, { useState, useEffect } from 'react';
+// ~/Online-Music-Player/spotify-web-player/src/Playlists.js
+import React, { useEffect, useState } from 'react';
 import './styles/Playlists.css';
 
 function Playlists({ token }) {
   const [playlists, setPlaylists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [playlistName, setPlaylistName] = useState('');
+  const [description, setDescription] = useState('');
+
+  // Function to fetch the user's playlists
+  const fetchUserPlaylists = async () => {
+    try {
+      const response = await fetch(`/api/playlists/user`);
+      const data = await response.json();
+      setPlaylists(data.items);
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+    }
+  };
 
   useEffect(() => {
     if (token) {
-      setLoading(true); // Set loading state to true when starting
-      fetch('https://api.spotify.com/v1/me/playlists', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.items) {
-            setPlaylists(data.items);
-          } else {
-            setError(true); // Trigger error if no items returned
-          }
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching playlists:', error);
-          setError(true); // Set error state on fetch failure
-          setLoading(false);
-        });
+      fetchUserPlaylists();
     }
   }, [token]);
+
+  // Function to handle playlist creation
+  const createPlaylist = async () => {
+    try {
+      await fetch('/api/playlists/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: playlistName,
+          description,
+        }),
+      });
+      setPlaylistName('');
+      setDescription('');
+      fetchUserPlaylists(); // Refresh playlists after creation
+    } catch (error) {
+      console.error("Error creating playlist:", error);
+    }
+  };
 
   return (
     <div className="playlists-container">
       <h1>Your Playlists</h1>
-      {loading ? (
-        <p>Loading playlists...</p>
-      ) : error ? (
-        <p>There was an error loading your playlists. Please try again.</p>
-      ) : playlists.length ? (
-        <div className="playlists-grid">
-          {playlists.map((playlist) => (
-            <div key={playlist.id} className="playlist-item">
-              <img src={playlist.images[0]?.url} alt={playlist.name} />
-              <div className="playlist-details">
-                <p>{playlist.name}</p>
-                <p>{playlist.tracks.total} songs</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>No playlists found.</p>
-      )}
+      <div className="create-playlist">
+        <input
+          type="text"
+          placeholder="Playlist Name"
+          value={playlistName}
+          onChange={(e) => setPlaylistName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <button onClick={createPlaylist}>Create Playlist</button>
+      </div>
+      <ul className="playlist-list">
+        {playlists.map((playlist) => (
+          <li key={playlist.id}>
+            <img src={playlist.images[0]?.url} alt="Playlist cover" />
+            <h3>{playlist.name}</h3>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -2,9 +2,23 @@ const express = require('express');
 const request = require('request');
 const router = express.Router();
 
-let access_token = ''; // Assume shared access token
+let access_token = ''; // Shared access token for Spotify API requests
 
-// Route to get a specific playlist by its ID
+// Route to get the current user's playlists
+router.get('/user', (req, res) => {
+    request.get({
+        url: 'https://api.spotify.com/v1/me/playlists',
+        headers: { Authorization: `Bearer ${access_token}` },
+        json: true,
+    }, (error, response, body) => {
+        if (error || response.statusCode !== 200) {
+            return res.status(response.statusCode).send('Error fetching user playlists');
+        }
+        res.json(body);
+    });
+});
+
+// Route to get details of a specific playlist
 router.get('/:id', (req, res) => {
     const playlistId = req.params.id;
 
@@ -13,65 +27,50 @@ router.get('/:id', (req, res) => {
         headers: { Authorization: `Bearer ${access_token}` },
         json: true,
     }, (error, response, body) => {
-        if (error || response.statusCode !== 200) return res.status(response.statusCode).send('Error fetching playlist');
+        if (error || response.statusCode !== 200) {
+            return res.status(response.statusCode).send('Error fetching playlist details');
+        }
         res.json(body);
     });
 });
 
-// Route to modify playlist details
-router.put('/:id', (req, res) => {
-    const playlistId = req.params.id;
-    const { name, description, publicStatus } = req.body;
+// Route to create a new playlist for the current user
+router.post('/create', (req, res) => {
+    const { name, description } = req.body;
 
-    request.put({
-        url: `https://api.spotify.com/v1/playlists/${playlistId}`,
+    request.post({
+        url: 'https://api.spotify.com/v1/me/playlists',
         headers: {
             Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            name: name || 'New Playlist Name',
-            description: description || 'Updated via API',
-            public: publicStatus || false
-        }),
-        json: true,
+        body: JSON.stringify({ name, description }),
     }, (error, response, body) => {
-        if (error || response.statusCode !== 200) return res.status(response.statusCode).send('Error updating playlist');
-        res.json(body);
+        if (error || response.statusCode !== 201) {
+            return res.status(response.statusCode).send('Error creating playlist');
+        }
+        res.json(JSON.parse(body));
     });
 });
 
-// Route to get playlist tracks
-router.get('/:id/tracks', (req, res) => {
+// Route to add tracks to a playlist
+router.post('/:id/tracks', (req, res) => {
     const playlistId = req.params.id;
+    const { uris } = req.body;
 
-    request.get({
+    request.post({
         url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-        headers: { Authorization: `Bearer ${access_token}` },
-        json: true,
-    }, (error, response, body) => {
-        if (error || response.statusCode !== 200) return res.status(response.statusCode).send('Error fetching playlist tracks');
-        res.json(body);
-    });
-});
-
-// Route to add a custom playlist cover image
-router.put('/:id/images', (req, res) => {
-    const playlistId = req.params.id;
-    const base64Image = req.body.image;
-
-    request.put({
-        url: `https://api.spotify.com/v1/playlists/${playlistId}/images`,
         headers: {
             Authorization: `Bearer ${access_token}`,
-            'Content-Type': 'image/jpeg'
+            'Content-Type': 'application/json',
         },
-        body: base64Image,
-    }, (error, response) => {
-        if (error || response.statusCode !== 202) return res.status(response.statusCode).send('Error uploading playlist cover image');
-        res.status(202).send('Cover image uploaded successfully');
+        body: JSON.stringify({ uris }),
+    }, (error, response, body) => {
+        if (error || response.statusCode !== 201) {
+            return res.status(response.statusCode).send('Error adding tracks to playlist');
+        }
+        res.json(JSON.parse(body));
     });
 });
 
-// Export router for playlist routes
 module.exports = router;

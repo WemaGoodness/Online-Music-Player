@@ -1,36 +1,29 @@
-/* Container for playlists */
 .playlists-container {
   padding: 20px;
-  background-color: #121212;
-  color: white;
-  text-align: center;
 }
 
-/* Grid layout for playlists */
-.playlists-grid {
+.create-playlist {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.playlist-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
 }
 
-/* Individual playlist item */
-.playlist-item {
-  background-color: #181818;
-  padding: 10px;
-  border-radius: 8px;
+.playlist-list li {
+  list-style: none;
   text-align: center;
-  color: white;
 }
 
-.playlist-item img {
+.playlist-list img {
   width: 100%;
   border-radius: 8px;
 }
 
-.playlist-details {
-  margin-top: 10px;
-}
-
-.playlist-details p {
-  margin: 5px 0;
+.playlist-list h3 {
+  font-size: 1.2em;
 }
