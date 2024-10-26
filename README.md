@@ -1,5 +1,5 @@
 # **Online-Music-Player**
-
+![Alt text](relative%20spotify-web-player/src/images/Onlinemusicplayerlg.jpg?raw=true)
 ## Introduction
 
 **Online-Music-Player** is a full-fledged music streaming web application that integrates with the Spotify API. It allows users to authenticate using their Spotify account, view and manage their playlists, browse artists and albums, search for music, and control playback directly within the app. Built with React for the frontend and Express for the backend, this application offers a seamless experience for music lovers by leveraging Spotify's vast library of tracks.
