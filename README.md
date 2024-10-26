@@ -20,6 +20,7 @@ This project is a dynamic web application, meaning it handles backend operations
 - **Node.js** and **Express.js** (Backend)
 - **Spotify Web API** for music data
 - **CSS** (Styling)
+- **MongoDB** (Database)
 
 ---
 
