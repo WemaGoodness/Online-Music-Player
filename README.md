@@ -122,6 +122,26 @@ Please ensure that your code follows the project's coding standards and includes
 
 ---
 
+## **Screenshots**
+
+|![screenshot](spotify-web-player/src/images/Homescreen.png)|
+|:--:|
+|Home Screen|
+
+|![screenshot](spotify-web-player/src/images/artistssearch.png)|
+|:--:|
+|Search|
+
+|![screenshot](spotify-web-player/src/images/tracklist.png)|
+|:--:|
+|Tracks|
+
+|![screenshot](spotify-web-player/src/images/Profilepage.png)|
+|:--:|
+|Profile|
+
+---
+
 ## **Related Projects**
 
 Here are some related projects and references that might be helpful:
