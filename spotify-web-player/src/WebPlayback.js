@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faForward, faBackward } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faPause, faForward, faBackward, faVolumeDown, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import './styles/WebPlayback.css';
 
+// Default track information when no track is playing
 const defaultTrack = {
   name: '',
   album: { images: [{ url: '' }] },
@@ -11,48 +12,38 @@ const defaultTrack = {
 };
 
 function WebPlayback({ token, playTrackProp }) {
-  const [player, setPlayer] = useState(undefined); // Store the player instance
+  const [player, setPlayer] = useState(undefined); // Spotify player instance
   const [currentTrack, setTrack] = useState(defaultTrack); // Current track details
-  const [currentTrackProgress, setTrackProgress] = useState(0); // Track progress
-  const [isPaused, setPaused] = useState(false); // Paused or playing state
-  const [volume, setVolume] = useState(50); // Volume state
+  const [currentTrackProgress, setTrackProgress] = useState(0); // Track progress in ms
+  const [isPaused, setPaused] = useState(false); // Play/Pause state
+  const [volume, setVolume] = useState(50); // Volume level (0-100)
 
-  // Function to play a specific track by URI
-  const playTrack = (trackUri) => {
-    fetch(`https://api.spotify.com/v1/me/player/play`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ uris: [trackUri] }),
-    })
-    .then(response => {
-      if (response.status === 204) {
-        console.log(`Playing track: ${trackUri}`);
-      } else {
-        console.error('Failed to play track');
-      }
-    })
-    .catch(error => console.error('Error playing track:', error));
+  // Format milliseconds to mm:ss format
+  const formatTime = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
   };
 
-  // Add the useEffect hook to load the SDK and initialize the player
+  // Initialize Spotify Web SDK
   useEffect(() => {
-    if (!token) return; // Exit if token is not provided
+    if (!token) return;
 
     const script = document.createElement("script");
     script.src = "https://sdk.scdn.co/spotify-player.js";
     script.async = true;
     document.body.appendChild(script);
 
+    // Load player instance
     window.onSpotifyWebPlaybackSDKReady = () => {
       const playerInstance = new window.Spotify.Player({
         name: 'Web Playback SDK',
-        getOAuthToken: cb => { cb(token); }, // Pass OAuth token
-        volume: 0.5, // Set initial volume to 50%
+        getOAuthToken: cb => { cb(token); },
+        volume: 0.5, // Default volume set to 50%
       });
 
-      setPlayer(playerInstance); // Store the player instance in state
+      setPlayer(playerInstance);
 
-      // Add event listeners to handle player readiness and state changes
       playerInstance.addListener('ready', ({ device_id }) => {
         console.log('Player is ready with Device ID', device_id);
       });
@@ -61,6 +52,7 @@ function WebPlayback({ token, playTrackProp }) {
         console.error('Device has gone offline', device_id);
       });
 
+      // Listen for track and playback state changes
       playerInstance.addListener('player_state_changed', (state) => {
         if (!state) return;
         setTrack(state.track_window.current_track); // Update current track
@@ -68,57 +60,64 @@ function WebPlayback({ token, playTrackProp }) {
         setPaused(state.paused); // Update paused/playing state
       });
 
-      // Connect the player to Spotify
       playerInstance.connect();
     };
 
-    // Provide the playTrack function to the parent component via prop
-    if (playTrackProp) {
-      playTrackProp(playTrack);
-    }
-
-    // Cleanup the script on component unmount
     return () => {
       document.body.removeChild(script);
     };
-  }, [token, playTrackProp]);
+  }, [token]);
 
-  // Function to seek the current track to a specific position
-  const seekToPosition = (positionMs) => {
-    if (player) {
-      fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${positionMs}`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((response) => {
-        if (response.status === 204) {
-          console.log(`Seeked to ${positionMs}ms`);
-        }
-      }).catch(err => console.error('Error seeking track:', err));
+  // Update track progress every second if playing
+  useEffect(() => {
+    let interval;
+    if (!isPaused) {
+      interval = setInterval(() => {
+        setTrackProgress((prev) => {
+          if (prev + 1000 < currentTrack.duration_ms) return prev + 1000;
+          clearInterval(interval);
+          return currentTrack.duration_ms;
+        });
+      }, 1000);
+    } else if (interval) {
+      clearInterval(interval);
     }
+    return () => clearInterval(interval);
+  }, [isPaused, currentTrack]);
+
+  // Seek track position
+  const seekToPosition = (positionMs) => {
+    fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${positionMs}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(err => console.error('Error seeking track:', err));
+    setTrackProgress(positionMs);
   };
 
-  // Adjust the player's volume
+  // Adjust volume
   const adjustVolume = (e) => {
     const newVolume = e.target.value;
-    setVolume(newVolume); // Update volume state
+    setVolume(newVolume);
     if (player) {
       player.setVolume(newVolume / 100).catch(err => console.error('Error setting volume:', err));
     }
   };
 
-  // Control playback (play/pause)
+  // Toggle play/pause
   const handleTogglePlay = () => {
     if (player) {
       player.togglePlay().catch(err => console.error('Error toggling play:', err));
     }
   };
 
+  // Skip to next track
   const handleNextTrack = () => {
     if (player) {
       player.nextTrack().catch(err => console.error('Error skipping track:', err));
     }
   };
 
+  // Go to previous track
   const handlePreviousTrack = () => {
     if (player) {
       player.previousTrack().catch(err => console.error('Error going to previous track:', err));
@@ -147,7 +146,9 @@ function WebPlayback({ token, playTrackProp }) {
         </div>
 
         <div className="control-sliders">
+          {/* Seek Control - Shows track progress */}
           <div className="seek-control">
+            <span>{formatTime(currentTrackProgress)}</span>
             <input
               type="range"
               min="0"
@@ -155,10 +156,12 @@ function WebPlayback({ token, playTrackProp }) {
               value={currentTrackProgress}
               onChange={(e) => seekToPosition(e.target.value)}
             />
-            <span>{Math.floor(currentTrackProgress / 1000)}s</span>
+            <span>{formatTime(currentTrack.duration_ms)}</span>
           </div>
 
+          {/* Volume Control - Adjusts volume level */}
           <div className="volume-control">
+            <FontAwesomeIcon icon={faVolumeDown} />
             <input
               type="range"
               min="0"
@@ -166,7 +169,7 @@ function WebPlayback({ token, playTrackProp }) {
               value={volume}
               onChange={adjustVolume}
             />
-            <span>Volume: {volume}%</span>
+            <FontAwesomeIcon icon={faVolumeUp} />
           </div>
         </div>
       </div>

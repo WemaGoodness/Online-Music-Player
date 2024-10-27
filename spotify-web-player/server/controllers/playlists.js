@@ -1,4 +1,3 @@
-// server/controllers/playlists.js
 const express = require('express');
 const request = require('request');
 const Playlist = require('../models/Playlists');
