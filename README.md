@@ -115,6 +115,13 @@ Please ensure that your code follows the project's coding standards and includes
 
 ---
 
+## **Issues**
+
+- The playlists aren't displayed at the moment.
+- Tracks can't be played from the lists due to spotify's 30 seconds restriction.
+
+---
+
 ## **Related Projects**
 
 Here are some related projects and references that might be helpful:
